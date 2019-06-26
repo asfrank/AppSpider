@@ -78,7 +78,20 @@ def handle_caipu_list(data):
             caipu_info["describe"] = item["r"]["cookstory"].replace("\n","").replace(" ","")
             caipu_info["caipu_name"] = item["r"]["n"]
             caipu_info["zuoliao_list"] = item["r"]["major"]
-            print(caipu_info)
+            detail_url = "http://api.douguo.net/recipe/detail/" + str(caipu_info["shicai_id"])
+            detail_data = {
+                "client": "4",
+                # "_session": "1561550962545865166011140236",
+                "author_id": "0",
+                "_vs": "5900",
+                "_ext": '{"query":{"kw":data["keyword"],"src":"2801","idx":"1","type":"13","id":caipu_info["shicai_id"]}}',
+            }
+            detail_response = handler_request(url=detail_url, data=detail_data)
+            detail_response_dict = json.loads(detail_response.text)
+            caipu_info["tips"] = detail_response_dict["result"]["recipe"]["tips"]
+            caipu_info["cookstep"] = detail_response_dict["result"]["recipe"]["cookstep"]
+            print("当前入库的菜谱", caipu_info["caipu_name"])
+            print(json.dumps(caipu_info))
         else:
             continue
 
