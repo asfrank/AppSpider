@@ -1,6 +1,8 @@
 import json
 from multiprocessing import Queue
 import requests
+from handle_mongo import mongo_info
+from concurrent.futures import ThreadPoolExecutor
 
 #创建队列
 queue_list = Queue()
@@ -91,11 +93,15 @@ def handle_caipu_list(data):
             caipu_info["tips"] = detail_response_dict["result"]["recipe"]["tips"]
             caipu_info["cookstep"] = detail_response_dict["result"]["recipe"]["cookstep"]
             print("当前入库的菜谱", caipu_info["caipu_name"])
-            print(json.dumps(caipu_info))
+            mongo_info.insert_item(caipu_info)
         else:
             continue
 
 
 handle_index()
+pool = ThreadPoolExecutor(max_workers=20)
+while queue_list.qsize() > 0:
+    pool.submit(handle_caipu_list, queue_list.get())
+
 # print(queue_list.qsize())
-handle_caipu_list(queue_list.get())
+# handle_caipu_list(queue_list.get())
